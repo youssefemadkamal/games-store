@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shopping Cart - Games Store</title>
+    <style>
+        :root {
+            --bg-top: #0f172a; 
+            --bg-bottom: #020617;
+            --panel-bg: rgba(23, 37, 84, 0.6); 
+            --primary-blue: #3B82F6;
+            --text-light: #F3F4F6; 
+            --text-muted: #9CA3AF;
+        }
+        
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            margin: 0; padding: 0; 
+            background: linear-gradient(180deg, var(--bg-top) 0%, var(--bg-bottom) 100%);
+            background-attachment: fixed;
+            color: var(--text-light); 
+            display: flex; flex-direction: column; min-height: 100vh; 
+        }
+
+        header { 
+            background-color: transparent; 
+            padding: 20px 50px; 
+            display: grid; 
+            grid-template-columns: 1fr auto 1fr;
+            align-items: center; 
+            position: absolute; 
+            top: 0; 
+            width: 100%;
+            box-sizing: border-box;
+            z-index: 100; 
+        }
+        
+        .logo-container { display: flex; align-items: center; gap: 10px; font-size: 1.5rem; font-weight: bold; cursor: pointer; }
+        .logo-container img { width: 40px; height: 40px; border-radius: 50%; background-color: #fff; object-fit: cover; }
+        
+        .nav-links { 
+            display: flex; gap: 30px; background: rgba(255, 255, 255, 0.1); 
+            padding: 10px 30px; border-radius: 30px; backdrop-filter: blur(10px);
+            justify-content: center;
+        }
+        .nav-links a { color: var(--text-light); text-decoration: none; font-weight: bold; font-size: 0.95rem; transition: color 0.3s; }
+        .nav-links a:hover, .nav-links a.active { color: var(--primary-blue); }
+
+        .header-actions {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+        }
+
+        .logout-btn { background-color: #ef4444; color: white !important; padding: 10px 20px; border-radius: 20px; font-weight: bold; text-decoration: none; transition: background 0.3s; }
+
+        .page-header {
+            width: 100%; height: 350px;
+            background-image: linear-gradient(rgba(15, 23, 42, 0.6), rgba(15, 23, 42, 0.6)), 
+                              url('https://images.unsplash.com/photo-1552820728-8b83bb6b773f?q=80&w=2070&auto=format&fit=crop'); 
+            background-size: cover; background-position: center; position: relative;
+            display: flex; justify-content: center; align-items: center; text-align: center;
+            -webkit-mask-image: linear-gradient(to bottom, black 70%, transparent 100%);
+            mask-image: linear-gradient(to bottom, black 70%, transparent 100%);
+        }
+
+        .page-header h1 { font-size: 3rem; text-transform: uppercase; letter-spacing: 2px; text-shadow: 0 5px 15px rgba(0,0,0,0.8); margin-top: 40px; }
+
+        .cart-container { display: flex; gap: 30px; padding: 40px; max-width: 1200px; margin: 0 auto; width: 100%; box-sizing: border-box; flex-wrap: wrap; flex: 1; }
+
+        .cart-items-section { flex: 2; min-width: 300px; }
+
+        .cart-item {
+            display: flex; background: rgba(20, 20, 20, 0.5); backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 12px; padding: 20px;
+            margin-bottom: 20px; align-items: center; gap: 20px; transition: all 0.3s ease;
+        }
+        .cart-item:hover { transform: translateX(10px); border-color: var(--primary-blue); background: rgba(30, 41, 59, 0.6); }
+
+        .cart-item img { width: 90px; aspect-ratio: 2/3; object-fit: cover; border-radius: 8px; box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
+
+        .item-details h3 { margin: 0 0 8px; font-size: 1.3rem; color: #fff; cursor: pointer; transition: color 0.3s; }
+        .item-details h3:hover { color: var(--primary-blue); }
+        .item-details p { margin: 0; color: var(--text-muted); font-size: 0.95rem; }
+        
+        .item-price-qty { text-align: right; }
+        .item-price-qty h4 { margin: 0 0 10px; color: #10b981; font-size: 1.4rem; }
+        .qty-badge { background: rgba(59, 130, 246, 0.2); color: var(--primary-blue); padding: 5px 15px; border-radius: 20px; font-size: 0.9rem; border: 1px solid rgba(59, 130, 246, 0.3); font-weight: bold;}
+
+        .remove-btn {
+            background: transparent; color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.4);
+            padding: 6px 15px; border-radius: 8px; cursor: pointer; font-size: 0.85rem; font-weight: bold; transition: all 0.3s; margin-top: 15px;
+        }
+        .remove-btn:hover { background: #ef4444; color: white; border-color: #ef4444; }
+
+        .checkout-section {
+            flex: 1; min-width: 300px; background: var(--panel-bg); backdrop-filter: blur(15px);
+            padding: 30px; border-radius: 15px; border: 1px solid rgba(255, 255, 255, 0.05);
+            height: fit-content; position: sticky; top: 100px;
+        }
+
+        .checkout-section h2 { margin-top: 0; border-bottom: 1px solid rgba(59, 130, 246, 0.3); padding-bottom: 15px; font-size: 1.6rem; }
+        
+        .summary-row { display: flex; justify-content: space-between; margin-bottom: 15px; color: var(--text-muted); }
+        .summary-row.total { color: white; font-size: 1.6rem; font-weight: bold; border-top: 1px solid rgba(255, 255, 255, 0.1); padding-top: 20px; margin-top: 10px; }
+
+        .payment-option {
+            display: flex; align-items: center; gap: 12px; background: rgba(15, 23, 42, 0.6); 
+            padding: 15px; border-radius: 10px; border: 1px solid rgba(255, 255, 255, 0.05); 
+            margin-bottom: 12px; cursor: pointer; transition: all 0.3s;
+        }
+        .payment-option:hover { border-color: var(--primary-blue); background: rgba(59, 130, 246, 0.1); }
+
+        .checkout-btn {
+            width: 100%; padding: 18px; background: var(--primary-blue); color: white; border: none; border-radius: 10px; 
+            font-size: 1.2rem; font-weight: bold; cursor: pointer; transition: all 0.3s ease; margin-top: 10px;
+        }
+        .checkout-btn:hover { background: #2563eb; transform: translateY(-3px); box-shadow: 0 10px 20px rgba(59, 130, 246, 0.4);}
+
+        footer { background-color: rgba(0,0,0,0.5); text-align: center; padding: 20px; color: var(--text-muted); border-top: 1px solid rgba(30, 58, 138, 0.2); margin-top: auto; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo-container" onclick="window.location.href='/index.html'">
+            <img src="https://i.pinimg.com/736x/68/0e/d9/680ed9ad3e25665eb9f5d9f598a119b7.jpg" alt="Logo">
+            Games Store
+        </div>
+        <div class="nav-links">
+            <a href="/index.html">Home</a>
+            <a href="/index.html#store-section">Store</a>
+            <a href="/favorites.html">Favorites</a>
+            <a href="/cart.html" class="active">Cart</a>
+            <a href="/dashboard.html" id="dashboardLink" style="display: none; color: #f59e0b;">Dashboard</a>
+        </div>
+        <div class="header-actions">
+            <a href="#" id="logoutBtn" class="logout-btn">Logout</a>
+        </div>
+    </header>
+
+    <div class="page-header">
+        <h1>🛒 Your Cart</h1>
+    </div>
+
+    <div class="cart-container">
+        <div class="cart-items-section">
+            <div id="cart-items-container">
+                <p style="color: var(--text-muted);">Loading your cart...</p>
+            </div>
+        </div>
+
+        <div class="checkout-section">
+            <h2>Order Summary</h2>
+            <div class="summary-row">
+                <span>Subtotal</span>
+                <span id="subtotalPrice">$0.00</span>
+            </div>
+            <div class="summary-row">
+                <span>Tax (5%)</span>
+                <span id="taxPrice">$0.00</span>
+            </div>
+            <div class="summary-row total">
+                <span>Total</span>
+                <span id="totalPrice" style="color: #10b981;">$0.00</span>
+            </div>
+
+            <div class="payment-methods" style="margin-top: 25px;">
+                <label class="payment-option">
+                    <input type="radio" name="payment" value="visa" checked> 💳 Credit Card
+                </label>
+                <label class="payment-option">
+                    <input type="radio" name="payment" value="paypal"> 🅿️ PayPal
+                </label>
+            </div>
+
+            <button class="checkout-btn" onclick="processCheckout()">Complete Purchase</button>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2026 Games Store. All rights reserved.</p>
+    </footer>
+
+    <script>
+        const token = localStorage.getItem('token');
+        if (!token) window.location.href = '/login.html';
+
+        async function checkAdminStatus() {
+            try {
+                const response = await fetch('/users/me', {
+                    headers: { 'token': token }
+                });
+                
+                if (response.ok) {
+                    const userData = await response.json();
+                    if (userData.role === 'admin') {
+                        document.getElementById('dashboardLink').style.display = 'inline-block';
+                    }
+                }
+            } catch (error) {}
+        }
+        checkAdminStatus();
+
+        document.getElementById('logoutBtn').addEventListener('click', () => {
+            localStorage.clear();
+            window.location.href = '/login.html';
+        });
+
+        async function loadCart() {
+            const container = document.getElementById('cart-items-container');
+            let subtotal = 0;
+            try {
+                const cartRes = await fetch('/cart', { headers: { 'token': token } });
+                const cartItems = await cartRes.json();
+                const gamesRes = await fetch('/games?limit=50');
+                let gamesData = await gamesRes.json();
+                const allGames = gamesData.games || gamesData;
+
+                container.innerHTML = '';
+                if (!cartItems || cartItems.length === 0) {
+                    container.innerHTML = '<p style="color: var(--text-muted); font-size: 1.2rem; text-align: center; margin-top: 30px;">Your cart is empty.</p>';
+                    updateCheckoutUI(0);
+                    return;
+                }
+
+                cartItems.forEach(cartItem => {
+                    const gameInfo = allGames.find(g => g._id === cartItem.GameId);
+                    if (gameInfo) {
+                        subtotal += cartItem.price;
+                        const card = document.createElement('div');
+                        card.className = 'cart-item';
+                        card.id = `cart-row-${cartItem._id}`;
+                        const gameImage = gameInfo.image || 'https://via.placeholder.com/100x150';
+
+                        card.innerHTML = `
+                            <img src="${gameImage}" alt="${gameInfo.title}" onclick="window.location.href='/game-details.html?id=${gameInfo._id}'">
+                            <div class="item-details">
+                                <h3 onclick="window.location.href='/game-details.html?id=${gameInfo._id}'">${gameInfo.title || gameInfo.name}</h3>
+                                <p>Unit Price: $${gameInfo.price}</p>
+                                <button class="remove-btn" onclick="removeFromCart('${cartItem._id}')">Remove Item</button>
+                            </div>
+                            <div class="item-price-qty">
+                                <h4>$${cartItem.price.toFixed(2)}</h4>
+                                <span class="qty-badge">Qty: ${cartItem.quantity || 1}</span>
+                            </div>
+                        `;
+                        container.appendChild(card);
+                    }
+                });
+                updateCheckoutUI(subtotal);
+            } catch (error) { container.innerHTML = '<p style="color: #ef4444;">Error loading cart.</p>'; }
+        }
+
+        async function removeFromCart(cartItemId) {
+            try {
+                const response = await fetch(`/cart/${cartItemId}`, { method: 'DELETE', headers: { 'token': token } });
+                if (response.ok) {
+                    const row = document.getElementById(`cart-row-${cartItemId}`);
+                    row.style.transform = 'scale(0.9)';
+                    row.style.opacity = '0';
+                    setTimeout(() => { loadCart(); }, 300);
+                }
+            } catch (error) {}
+        }
+
+        function updateCheckoutUI(subtotal) {
+            const tax = subtotal * 0.05; 
+            const total = subtotal + tax;
+            document.getElementById('subtotalPrice').innerText = `$${subtotal.toFixed(2)}`;
+            document.getElementById('taxPrice').innerText = `$${tax.toFixed(2)}`;
+            document.getElementById('totalPrice').innerText = `$${total.toFixed(2)}`;
+        }
+
+        async function processCheckout() {
+            const totalText = document.getElementById('totalPrice').innerText;
+            
+            if(totalText === "$0.00") return alert("Cart is empty!");
+
+            try {
+                const response = await fetch('/order', { 
+                    method: 'POST', 
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'token': token 
+                    } 
+                });
+
+                if (response.ok || response.status === 201) {
+                    alert(`Success! 🎉 Your order has been placed.\nTotal: ${totalText}`);
+                    loadCart(); 
+                } else {
+                    const data = await response.json();
+                    alert(data.message || "Failed to place order.");
+                }
+            } catch (error) {
+                alert("Network error, please try again.");
+            }
+        }
+        
+        loadCart();
+    </script>
+</body>
+</html>

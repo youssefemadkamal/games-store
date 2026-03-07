@@ -1,0 +1,50 @@
+👤Dev 1 
+ Setup & Auth
+Setup المشروع وربط MongoDB
+User Model
+Sign up
+Login
+Password hashing
+JWT
+Middleware للتحقق من التوكن
+Role-based authorization
+Global error handler
+*************
+👤 Dev 2 — Games API
+Game Model
+Create game (Admin)
+Get all games (pagination + search)
+Get single game
+Update game (Admin)
+Delete game (Admin)
+************
+👤 Dev 3 — Favorites
+Add to favorites
+Remove from favorites
+Get favorites منع التكرار
+add rating to game 
+**************
+👤 Dev 4 — Cart + Orders
+Add to cart
+Update quantity
+Remove item
+Clear cart
+Get cart
+Order Model
+Create order من cart
+total price
+Get user orders
+Admin يشوف كل الطلبات
+Update order status
+************
+👤 Dev 5 —  + Community
+🔹 Community (Socket.io)
+Setup socket server
+Global chat
+Broadcast messages
+Track online users
+لو عرفت تعمل اشعار يوصل لليوزر لما الادمن يضيف لعبه او يعدل عليها  يبقي تمام مظبطتش معاك خلاص 
+التأكد إن اللعبة موجودة
+
+******************************************
+

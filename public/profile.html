@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Profile - Games Store</title>
+    <style>
+        :root {
+            --bg-top: #0f172a; 
+            --bg-bottom: #020617;
+            --panel-bg: rgba(15, 23, 42, 0.75); 
+            --primary-blue: #3B82F6;
+            --text-light: #F3F4F6; 
+            --text-muted: #9CA3AF;
+            --accent-yellow: #f59e0b;
+        }
+
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            margin: 0;
+            color: var(--text-light);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            background: linear-gradient(180deg, var(--bg-top) 0%, var(--bg-bottom) 100%);
+            background-attachment: fixed;
+            overflow-x: hidden;
+        }
+
+        .page-bg-fade {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-image: url('https://images.unsplash.com/photo-1593640408182-31c70c8268f5?q=80&w=2042&auto=format&fit=crop');
+            background-size: cover;
+            background-position: center;
+            z-index: -1;
+            opacity: 0.25;
+            -webkit-mask-image: radial-gradient(circle at right center, rgba(0,0,0,1) 0%, rgba(0,0,0,0) 80%);
+            mask-image: radial-gradient(circle at right center, rgba(0,0,0,1) 0%, rgba(0,0,0,0) 80%);
+        }
+
+        header {
+            background-color: transparent;
+            padding: 20px 50px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: absolute;
+            top: 0;
+            width: 100%;
+            box-sizing: border-box;
+            z-index: 100;
+        }
+
+        .logo-container { display: flex; align-items: center; gap: 10px; font-size: 1.5rem; font-weight: bold; cursor: pointer; text-decoration: none; color: var(--text-light);}
+        .logo-container img { width: 40px; height: 40px; border-radius: 50%; background-color: #fff; object-fit: cover; }
+        
+        .nav-links { 
+            display: flex; gap: 30px; background: rgba(255, 255, 255, 0.05); 
+            padding: 10px 30px; border-radius: 30px; backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1);
+            align-items: center;
+        }
+        .nav-links a { color: var(--text-light); text-decoration: none; font-weight: bold; font-size: 0.95rem; transition: color 0.3s; cursor: pointer;}
+        .nav-links a:hover, .nav-links a.active { color: var(--primary-blue); }
+        .logout-btn { color: #ef4444 !important; }
+
+        .main-content {
+            flex: 1;
+            display: block;
+            padding: 160px 80px 80px; 
+            max-width: 1500px;
+            margin: 0 auto;
+            width: 100%;
+            box-sizing: border-box;
+            z-index: 10;
+        }
+
+        .page-title {
+            font-size: 3.5rem;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            margin-top: 0;
+            margin-bottom: 60px;
+            text-shadow: 0 5px 15px rgba(0,0,0,0.8);
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding-bottom: 20px;
+        }
+
+        .profile-layout { 
+            display: grid;
+            grid-template-columns: 400px 1fr; 
+            gap: 80px;
+            align-items: start;
+        }
+
+        .profile-sidebar {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        .profile-img-container {
+            width: 320px; 
+            height: 320px;
+            border-radius: 50%;
+            border: 5px solid rgba(59, 130, 246, 0.5);
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+            background: #0f172a;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 0 50px rgba(59, 130, 246, 0.5), inset 0 0 30px rgba(0,0,0,0.8);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            margin-bottom: 30px;
+        }
+
+        .profile-img-container.disabled {
+            pointer-events: none;
+            border-color: rgba(255, 255, 255, 0.1);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+        }
+
+        .profile-img-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: 1;
+            transition: transform 0.4s;
+        }
+
+        .profile-img-overlay {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(59, 130, 246, 0.8);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: #fff;
+            font-size: 1.2rem;
+            font-weight: bold;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: 2;
+        }
+
+        .profile-img-container:not(.disabled):hover img { transform: scale(1.1); }
+        .profile-img-container:not(.disabled):hover .profile-img-overlay { opacity: 1; }
+        input[type="file"] { display: none; }
+
+        .display-name {
+            font-size: 2.2rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.5);
+        }
+
+        .role-badge {
+            background: rgba(245, 158, 11, 0.15);
+            color: var(--accent-yellow);
+            padding: 10px 25px;
+            border-radius: 30px;
+            font-size: 1rem;
+            font-weight: bold;
+            border: 1px solid rgba(245, 158, 11, 0.3);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            display: none; 
+        }
+
+        .profile-form-area {
+            background: transparent; 
+            padding-top: 20px;
+        }
+
+        .input-group { position: relative; width: 100%; margin-bottom: 35px; }
+        
+        .input-group label {
+            display: block;
+            margin-bottom: 12px;
+            color: var(--primary-blue); 
+            font-size: 1.1rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        input[type="text"], input[type="email"] { 
+            width: 100%; 
+            box-sizing: border-box;
+            padding: 22px 25px; 
+            border: 1px solid rgba(255, 255, 255, 0.15); 
+            border-radius: 16px; 
+            background: rgba(15, 23, 42, 0.6); 
+            backdrop-filter: blur(10px);
+            color: #fff;
+            outline: none;
+            font-size: 1.2rem;
+            transition: all 0.3s ease;
+            box-shadow: inset 0 2px 5px rgba(0,0,0,0.5);
+        }
+
+        input:focus { 
+            border-color: var(--primary-blue); 
+            background: rgba(15, 23, 42, 0.9); 
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.3); 
+        }
+
+        input:disabled {
+            background: rgba(0, 0, 0, 0.3);
+            color: var(--text-muted);
+            border-color: rgba(255, 255, 255, 0.05);
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 20px;
+            margin-top: 50px;
+        }
+
+        .btn { 
+            flex: 1;
+            padding: 20px;
+            border: none; 
+            border-radius: 16px; 
+            cursor: pointer; 
+            font-size: 1.2rem; 
+            font-weight: bold;
+            transition: all 0.3s ease; 
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .edit-btn {
+            background: var(--primary-blue); 
+            color: white; 
+            box-shadow: 0 10px 25px rgba(59, 130, 246, 0.4);
+            max-width: 400px;
+        }
+        .edit-btn:hover { background: #2563eb; transform: translateY(-3px); box-shadow: 0 15px 35px rgba(59, 130, 246, 0.6); }
+
+        .save-btn {
+            background: #10b981; 
+            color: white; 
+            box-shadow: 0 10px 25px rgba(16, 185, 129, 0.4);
+        }
+        .save-btn:hover:not(:disabled) { background: #059669; transform: translateY(-3px); box-shadow: 0 15px 35px rgba(16, 185, 129, 0.6); }
+        .save-btn:disabled { opacity: 0.7; cursor: not-allowed; }
+
+        .cancel-btn {
+            background: rgba(255,255,255,0.05);
+            color: var(--text-light);
+            border: 1px solid rgba(255,255,255,0.2);
+            backdrop-filter: blur(10px);
+        }
+        .cancel-btn:hover { background: rgba(239, 68, 68, 0.2); border-color: #ef4444; color: #ef4444; }
+
+        .hidden { display: none !important; }
+
+        .msg { margin-top: 30px; font-size: 1.1rem; font-weight: 500; padding: 15px; border-radius: 12px; }
+        .error { background: rgba(239, 68, 68, 0.15); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.4); }
+        .success { background: rgba(16, 185, 129, 0.15); color: #6ee7b7; border: 1px solid rgba(16, 185, 129, 0.4); }
+
+        footer { background-color: rgba(0,0,0,0.5); text-align: center; padding: 20px; color: var(--text-muted); border-top: 1px solid rgba(30, 58, 138, 0.2); margin-top: auto; }
+
+        @media (max-width: 1024px) {
+            .profile-layout { grid-template-columns: 1fr; gap: 50px; }
+            .profile-sidebar { border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 50px; }
+            .main-content { padding: 130px 40px 60px; }
+            .action-buttons { flex-direction: column; }
+            .edit-btn { max-width: 100%; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="page-bg-fade"></div>
+
+    <header>
+        <a href="/index.html" class="logo-container">
+            <img src="https://i.pinimg.com/736x/68/0e/d9/680ed9ad3e25665eb9f5d9f598a119b7.jpg" alt="Logo">
+            Games Store
+        </a>
+        <div class="nav-links">
+            <a href="/index.html">Home</a>
+            <a href="/index.html#store-section">Store</a>
+            <a href="/dashboard.html" id="dashboardLink" style="display: none; color: var(--accent-yellow);">Dashboard</a>
+            <a onclick="logout()" class="logout-btn">Logout</a>
+        </div>
+    </header>
+
+    <div class="main-content">
+        <h1 class="page-title">Player Profile</h1>
+        
+        <div class="profile-layout">
+            
+            <div class="profile-sidebar">
+                <div class="profile-img-container disabled" id="imgContainer" onclick="document.getElementById('profileImage').click()">
+                    <img id="previewImg" src="https://cdn.vectorstock.com/i/1000v/76/28/unknown-person-user-icon-for-web-vector-34757628.jpg" alt="Profile Picture">
+                    <div class="profile-img-overlay">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom: 15px;"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
+                        Change Avatar
+                    </div>
+                    <input type="file" id="profileImage" name="image" accept="image/*" form="profileForm">
+                </div>
+
+                <div id="displayUserName" class="display-name">Loading...</div>
+                <div id="roleBadge" class="role-badge">Administrator</div>
+            </div>
+
+            <div class="profile-form-area">
+                <form id="profileForm" enctype="multipart/form-data">
+                    
+                    <div class="input-group">
+                        <label for="profileName">Username</label>
+                        <input type="text" id="profileName" required disabled>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label for="profileEmail">Email Address</label>
+                        <input type="email" id="profileEmail" required disabled>
+                    </div>
+
+                    <div class="action-buttons">
+                        <button type="button" class="btn edit-btn" id="startEditBtn">Edit Profile Settings</button>
+                        <button type="submit" class="btn save-btn hidden" id="saveBtn">Save Configuration</button>
+                        <button type="button" class="btn cancel-btn hidden" id="cancelEditBtn">Discard Changes</button>
+                    </div>
+                </form>
+                
+                <div id="statusMsg" class="msg" style="display: none;"></div>
+            </div>
+
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2026 Games Store. All rights reserved.</p>
+    </footer>
+
+    <script>
+        const token = localStorage.getItem('token');
+        if (!token) {
+            window.location.href = '/login.html'; 
+        }
+
+        function logout() {
+            localStorage.clear();
+            window.location.href = '/login.html';
+        }
+
+        let originalData = { name: '', email: '', image: '' };
+
+        async function fetchUserData() {
+            try {
+                const response = await fetch('/users/me', {
+                    method: 'GET',
+                    headers: { 'token': token }
+                });
+                
+                const data = await response.json();
+
+                if (response.ok) {
+                    const user = data.user || data.data || data; 
+                    
+                    document.getElementById('profileName').value = user.name;
+                    document.getElementById('profileEmail').value = user.email;
+                    document.getElementById('displayUserName').innerText = user.name; 
+                    
+                    if (user.role === 'admin') {
+                        document.getElementById('roleBadge').style.display = 'inline-block';
+                        document.getElementById('dashboardLink').style.display = 'inline-block';
+                    }
+                    
+                    if (user.Image && user.Image !== 'default-avatar.png') {
+                        const imgUrl = `/uploads/${user.Image}`;
+                        document.getElementById('previewImg').src = imgUrl;
+                        originalData.image = imgUrl; 
+                    } else {
+                        originalData.image = 'https://cdn.vectorstock.com/i/1000v/76/28/unknown-person-user-icon-for-web-vector-34757628.jpg';
+                        document.getElementById('previewImg').src = originalData.image;
+                    }
+
+                    originalData.name = user.name;
+                    originalData.email = user.email;
+
+                } else {
+                    if(response.status === 401) logout();
+                }
+            } catch (err) {
+                document.getElementById('displayUserName').innerText = 'Error Loading Data';
+            }
+        }
+
+        fetchUserData();
+
+        const startEditBtn = document.getElementById('startEditBtn');
+        const saveBtn = document.getElementById('saveBtn');
+        const cancelEditBtn = document.getElementById('cancelEditBtn');
+        const profileName = document.getElementById('profileName');
+        const profileEmail = document.getElementById('profileEmail');
+        const imgContainer = document.getElementById('imgContainer');
+        const msgBox = document.getElementById('statusMsg');
+
+        startEditBtn.addEventListener('click', () => {
+            profileName.disabled = false;
+            profileEmail.disabled = false;
+            imgContainer.classList.remove('disabled');
+            startEditBtn.classList.add('hidden');
+            saveBtn.classList.remove('hidden');
+            cancelEditBtn.classList.remove('hidden');
+            msgBox.style.display = 'none';
+            profileName.focus();
+        });
+
+        cancelEditBtn.addEventListener('click', () => {
+            profileName.value = originalData.name;
+            profileEmail.value = originalData.email;
+            document.getElementById('previewImg').src = originalData.image;
+            document.getElementById('profileImage').value = ''; 
+            profileName.disabled = true;
+            profileEmail.disabled = true;
+            imgContainer.classList.add('disabled');
+            startEditBtn.classList.remove('hidden');
+            saveBtn.classList.add('hidden');
+            cancelEditBtn.classList.add('hidden');
+            msgBox.style.display = 'none'; 
+        });
+
+        document.getElementById('profileImage').addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('previewImg').src = e.target.result;
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+
+        document.getElementById('profileForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            saveBtn.innerText = "Saving...";
+            saveBtn.disabled = true;
+
+            const formData = new FormData();
+            formData.append('name', profileName.value);
+            formData.append('email', profileEmail.value);
+            
+            const imageFile = document.getElementById('profileImage').files[0];
+            if (imageFile) {
+                formData.append('image', imageFile);
+            }
+
+            try {
+                const response = await fetch('/users/update', {
+                    method: 'PUT', 
+                    headers: { 'token': token },
+                    body: formData
+                });
+                
+                const data = await response.json();
+                msgBox.style.display = 'block';
+
+                if (response.ok) {
+                    msgBox.className = 'msg success';
+                    msgBox.innerText = "Configuration saved successfully!";
+                    localStorage.setItem('userName', profileName.value);
+                    document.getElementById('displayUserName').innerText = profileName.value;
+                    
+                    originalData.name = profileName.value;
+                    originalData.email = profileEmail.value;
+                    if(data.user && data.user.Image) {
+                         originalData.image = `/uploads/${data.user.Image}`;
+                    }
+
+                    setTimeout(() => {
+                        profileName.disabled = true;
+                        profileEmail.disabled = true;
+                        imgContainer.classList.add('disabled');
+                        startEditBtn.classList.remove('hidden');
+                        saveBtn.classList.add('hidden');
+                        cancelEditBtn.classList.add('hidden');
+                        msgBox.style.display = 'none';
+                        saveBtn.innerText = "Save Configuration";
+                        saveBtn.disabled = false;
+                    }, 2000);
+
+                } else {
+                    msgBox.className = 'msg error';
+                    msgBox.innerText = data.message || "Failed to update profile.";
+                    saveBtn.innerText = "Save Configuration";
+                    saveBtn.disabled = false;
+                }
+            } catch (err) { 
+                msgBox.style.display = 'block';
+                msgBox.className = 'msg error'; 
+                msgBox.innerText = "Network error, please try again."; 
+                saveBtn.innerText = "Save Configuration";
+                saveBtn.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>

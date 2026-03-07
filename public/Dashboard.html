@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Games Store</title>
+    <style>
+        :root {
+            --bg-top: #0f172a; 
+            --bg-bottom: #020617;
+            --panel-bg: rgba(23, 37, 84, 0.45); 
+            --primary-blue: #3B82F6;
+            --text-light: #F3F4F6; 
+            --text-muted: #9CA3AF;
+            --admin-color: #f59e0b;
+        }
+
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            margin: 0; padding: 0; 
+            background: linear-gradient(180deg, var(--bg-top) 0%, var(--bg-bottom) 100%);
+            background-attachment: fixed;
+            color: var(--text-light); 
+            display: flex; flex-direction: column; min-height: 100vh; 
+            overflow-x: hidden;
+        }
+
+        header { 
+            background-color: transparent; 
+            padding: 20px 50px; display: flex; justify-content: space-between; align-items: center; 
+            position: absolute; top: 0; width: 100%; box-sizing: border-box; z-index: 100;
+        }
+        
+        .logo-container { display: flex; align-items: center; gap: 10px; font-size: 1.5rem; font-weight: bold; cursor: pointer; color: var(--text-light); }
+        .logo-container img { width: 40px; height: 40px; border-radius: 50%; background-color: #fff; object-fit: cover; }
+        
+        .nav-links { 
+            display: flex; gap: 30px; background: rgba(255, 255, 255, 0.1); 
+            padding: 10px 30px; border-radius: 30px; backdrop-filter: blur(10px);
+        }
+        .nav-links a { color: var(--text-light); text-decoration: none; font-weight: bold; font-size: 0.95rem; transition: color 0.3s; }
+        .nav-links a:hover, .nav-links a.active { color: var(--admin-color); }
+
+        .header-right { display: flex; align-items: center; gap: 20px; }
+
+        .logout-btn { background-color: #ef4444; color: white !important; padding: 10px 20px; border-radius: 20px; font-weight: bold; text-decoration: none; transition: background 0.3s; border: none; cursor: pointer; font-size: 0.9rem;}
+        .logout-btn:hover { background-color: #dc2626; }
+
+        .page-header {
+            width: 100%; height: 350px;
+            background-image: linear-gradient(rgba(15, 23, 42, 0.7), rgba(15, 23, 42, 0.7)), 
+                              url('https://images.unsplash.com/photo-1511512578047-dfb367046420?q=80&w=1471&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D'); 
+            background-size: cover; background-position: center; position: relative;
+            display: flex; justify-content: center; align-items: center; text-align: center;
+            -webkit-mask-image: linear-gradient(to bottom, black 60%, transparent 100%);
+            mask-image: linear-gradient(to bottom, black 60%, transparent 100%);
+        }
+
+        .page-header h1 { font-size: 3rem; text-transform: uppercase; letter-spacing: 2px; text-shadow: 0 5px 15px rgba(0,0,0,0.8); margin-top: 40px; color: var(--admin-color); }
+
+        .dashboard-container {
+            display: flex; flex: 1; padding: 0 40px 60px; gap: 40px; max-width: 1400px; margin: -80px auto 0; width: 100%; box-sizing: border-box; position: relative; z-index: 10;
+        }
+
+        .sidebar {
+            width: 260px; background: var(--panel-bg); backdrop-filter: blur(15px); border-radius: 20px; border: 1px solid rgba(255,255,255,0.05); padding: 25px; height: fit-content;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+        }
+        
+        .sidebar h3 { margin-top: 0; color: var(--text-muted); font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1.5px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 12px; margin-bottom: 15px;}
+        .sidebar ul { list-style: none; padding: 0; margin: 0; }
+        .sidebar li { margin-bottom: 12px; }
+        .sidebar a {
+            display: block; padding: 14px 18px; color: var(--text-light); text-decoration: none; border-radius: 12px; transition: all 0.3s; font-weight: 500;
+        }
+        .sidebar a:hover, .sidebar a.active { background: rgba(245, 158, 11, 0.15); color: var(--admin-color); border-left: 4px solid var(--admin-color); }
+
+        .main-content {
+            flex: 1; background: var(--panel-bg); backdrop-filter: blur(15px); border-radius: 20px; border: 1px solid rgba(255,255,255,0.05); padding: 35px; position: relative;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5); overflow-x: auto;
+        }
+
+        .header-actions { display: flex; justify-content: space-between; align-items: center; margin-bottom: 35px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 20px;}
+        .header-actions h2 { margin: 0; font-size: 2.2rem; color: #fff; text-shadow: 0 2px 5px rgba(0,0,0,0.5);}
+        .add-btn { background: var(--admin-color); color: #000; border: none; padding: 12px 25px; border-radius: 12px; font-weight: bold; cursor: pointer; transition: all 0.3s; font-size: 1rem;}
+        .add-btn:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(245, 158, 11, 0.4);}
+
+        table { width: 100%; border-collapse: separate; border-spacing: 0; margin-top: 10px; }
+        th, td { padding: 18px; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.03); }
+        th { color: var(--text-muted); font-weight: 600; text-transform: uppercase; font-size: 0.85rem; letter-spacing: 1px; }
+        tr { transition: background 0.2s; }
+        tr:hover { background: rgba(255,255,255,0.02); }
+        
+        .role-badge { padding: 6px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: bold; border: 1px solid transparent; }
+        .role-admin { background: rgba(245, 158, 11, 0.1); color: var(--admin-color); border-color: rgba(245, 158, 11, 0.3); }
+        .role-user { background: rgba(59, 130, 246, 0.1); color: var(--primary-blue); border-color: rgba(59, 130, 246, 0.3); }
+
+        .action-btn { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: var(--text-light); cursor: pointer; padding: 8px; margin-right: 8px; transition: all 0.3s; display: inline-flex; align-items: center; justify-content: center;}
+        .action-btn:hover { background: rgba(255,255,255,0.1); transform: translateY(-2px); }
+        .action-btn.delete:hover { background: rgba(239, 68, 68, 0.2); border-color: #ef4444; }
+
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(2, 6, 23, 0.85); backdrop-filter: blur(8px);
+            display: none; justify-content: center; align-items: center; z-index: 1000;
+        }
+        
+        .modal-box {
+            background: rgba(15, 23, 42, 0.95); border: 1px solid rgba(255,255,255,0.1);
+            padding: 40px; border-radius: 20px; width: 500px; max-width: 90%;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.8); position: relative;
+            max-height: 85vh; overflow-y: auto;
+            animation: slideUp 0.3s ease-out;
+        }
+        
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+        .modal-box h3 { margin-top: 0; color: #fff; margin-bottom: 25px; font-size: 1.8rem; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 15px;}
+        
+        .close-modal {
+            position: absolute; top: 20px; right: 25px;
+            background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: var(--text-muted); 
+            width: 35px; height: 35px; border-radius: 50%; font-size: 1.2rem; cursor: pointer; transition: 0.3s;
+            display: flex; justify-content: center; align-items: center;
+        }
+        .close-modal:hover { background: #ef4444; color: white; border-color: #ef4444; transform: rotate(90deg);}
+        
+        .form-group { margin-bottom: 18px; }
+        .form-group input, .form-group select {
+            width: 100%; padding: 15px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);
+            background: rgba(10, 13, 28, 0.6); color: white; box-sizing: border-box; font-family: inherit; font-size: 0.95rem; transition: 0.3s;
+        }
+        .form-group input:focus, .form-group select:focus { border-color: var(--admin-color); background: rgba(10, 13, 28, 0.9); outline: none; }
+        
+        .submit-btn {
+            width: 100%; padding: 16px; background: var(--admin-color); color: #000;
+            border: none; border-radius: 12px; font-weight: bold; cursor: pointer; margin-top: 15px; font-size: 1.1rem; transition: 0.3s;
+        }
+        .submit-btn:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(245, 158, 11, 0.4);}
+        
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); border-radius: 10px;}
+        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
+
+        footer { background-color: rgba(0,0,0,0.5); text-align: center; padding: 20px; color: var(--text-muted); border-top: 1px solid rgba(30, 58, 138, 0.2); margin-top: auto; }
+
+        .pagination {
+            display: flex; justify-content: center; align-items: center; margin-top: 30px; gap: 8px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.05);
+        }
+        .page-btn {
+            background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); color: var(--text-light); padding: 8px 14px; cursor: pointer; border-radius: 8px; font-weight: bold; transition: all 0.3s;
+        }
+        .page-btn:hover:not(:disabled) { background: rgba(245, 158, 11, 0.2); border-color: var(--admin-color); color: white; transform: translateY(-2px); }
+        .page-btn.active { background: var(--admin-color); color: #000; border-color: var(--admin-color); }
+        .page-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo-container" onclick="window.location.href='/index.html'">
+            <img src="https://i.pinimg.com/736x/68/0e/d9/680ed9ad3e25665eb9f5d9f598a119b7.jpg" alt="Logo">
+            Games Store
+        </div>
+        <div class="nav-links">
+            <a href="/index.html">Home</a>
+            <a href="/index.html#store-section">Store</a>
+            <a href="/favorites.html">Favorites</a>
+            <a href="/cart.html">Cart</a>
+            <a href="/dashboard.html" class="active" id="dashboardLink">Dashboard</a>
+        </div>
+        <div class="header-right">
+            <span style="color: var(--admin-color); font-weight: bold;" id="adminName"></span>
+            <button class="logout-btn" id="logoutBtn">Logout</button>
+        </div>
+    </header>
+
+    <div class="page-header">
+        <h1>⚙️ Admin Dashboard</h1>
+    </div>
+
+    <div class="dashboard-container">
+        <aside class="sidebar">
+            <h3>Management</h3>
+            <ul>
+                <li><a href="#" class="active" id="nav-users">👥 Manage Users</a></li>
+                <li><a href="#" id="nav-games">🎮 Manage Games</a></li>
+                <li><a href="#" id="nav-orders">📦 Orders</a></li>
+            </ul>
+        </aside>
+
+        <main class="main-content">
+            <div class="header-actions">
+                <h2 id="sectionTitle">Manage Users</h2>
+                <button class="add-btn" id="addBtn">+ Add User</button>
+            </div>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Role</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                    <tr><td colspan="5" style="text-align: center; color: var(--text-muted); padding: 40px;">Loading data...</td></tr>
+                </tbody>
+            </table>
+
+            <div id="pagination-container" class="pagination"></div>
+
+        </main>
+    </div>
+
+    <div class="modal-overlay" id="dynamicModal">
+        <div class="modal-box">
+            <button class="close-modal">&times;</button>
+            <h3 id="modalTitle">Add Item</h3>
+            <form id="dynamicForm">
+            </form>
+        </div>
+    </div>
+
+ <script>
+        const token = localStorage.getItem('token');
+        const role = localStorage.getItem('userRole');
+        const userName = localStorage.getItem('userName');
+
+       
+
+        document.getElementById('adminName').innerText = `Welcome, ${userName}`;
+
+        document.getElementById('logoutBtn').addEventListener('click', () => {
+            localStorage.clear();
+            window.location.href = '/login.html';
+        });
+
+        const sectionTitle = document.getElementById('sectionTitle');
+        const addBtn = document.getElementById('addBtn');
+        const tBody = document.getElementById('tableBody');
+        const tHead = document.querySelector('thead');
+        const paginationContainer = document.getElementById('pagination-container');
+        
+        const modal = document.getElementById('dynamicModal');
+        const modalTitle = document.getElementById('modalTitle');
+        const dynamicForm = document.getElementById('dynamicForm');
+        const closeModalBtn = document.querySelector('.close-modal');
+
+        let currentTab = 'users';
+
+        function setActiveNav(navId) {
+            document.querySelectorAll('.sidebar a').forEach(a => a.classList.remove('active'));
+            document.getElementById(navId).classList.add('active');
+        }
+
+        async function fetchUsers() {
+            currentTab = 'users';
+            setActiveNav('nav-users');
+            sectionTitle.innerText = "Manage Users";
+            addBtn.innerText = "+ Add Admin";
+            addBtn.style.display = 'block';
+            addBtn.style.backgroundColor = 'var(--admin-color)';
+            addBtn.style.color = '#000';
+            paginationContainer.innerHTML = ''; 
+            
+            tHead.innerHTML = `<tr><th>ID</th><th>Name</th><th>Email</th><th>Role</th><th>Actions</th></tr>`;
+            tBody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: var(--text-muted); padding: 40px;">Loading users...</td></tr>';
+            
+            try {
+                const res = await fetch('/users/all', { headers: { 'token': token } }); 
+                const data = await res.json();
+                const users = Array.isArray(data) ? data : (data.users || []);
+
+                tBody.innerHTML = '';
+                if(users.length === 0) {
+                    tBody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: var(--text-muted); padding: 40px;">No users found.</td></tr>';
+                    return;
+                }
+
+                users.forEach(user => {
+                    const roleClass = user.role === 'admin' ? 'role-admin' : 'role-user';
+                    tBody.innerHTML += `
+                        <tr>
+                            <td style="color: var(--text-muted); font-family: monospace;">...${user._id.slice(-6)}</td>
+                            <td style="font-weight: 500;">${user.name}</td>
+                            <td style="color: var(--text-muted);">${user.email}</td>
+                            <td><span class="role-badge ${roleClass}">${user.role.toUpperCase()}</span></td>
+                            <td>
+                                <button class="action-btn delete" onclick="deleteUser('${user._id}')" title="Delete User">🗑️</button>
+                            </td>
+                        </tr>
+                    `;
+                });
+            } catch (err) {
+                tBody.innerHTML = '<tr><td colspan="5" style="color: #ef4444; padding: 40px; text-align: center;">Failed to load users.</td></tr>';
+            }
+        }
+
+        async function fetchGamesAdmin(page = 1) {
+            currentTab = 'games';
+            setActiveNav('nav-games');
+            sectionTitle.innerText = "Manage Games";
+            addBtn.innerText = "+ Add Game";
+            addBtn.style.display = 'block';
+            addBtn.style.backgroundColor = 'var(--primary-blue)';
+            addBtn.style.color = '#fff';
+            
+            tHead.innerHTML = `<tr><th>ID</th><th>Image</th><th>Title</th><th>Price</th><th>Actions</th></tr>`;
+            tBody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: var(--text-muted); padding: 40px;">Loading games...</td></tr>';
+            
+            try {
+                const res = await fetch(`/games?page=${page}`); 
+                const data = await res.json();
+                const games = data.games || (Array.isArray(data) ? data : []);
+
+                tBody.innerHTML = '';
+                if(games.length === 0) {
+                    tBody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: var(--text-muted); padding: 40px;">No games found.</td></tr>';
+                    paginationContainer.innerHTML = '';
+                    return;
+                }
+
+                games.forEach(game => {
+                    const gameImage = game.image || 'https://via.placeholder.com/50';
+                    const gameTitle = game.title || game.name || 'Unknown';
+                    tBody.innerHTML += `
+                        <tr>
+                            <td style="color: var(--text-muted); font-family: monospace;">...${game._id.slice(-6)}</td>
+                            <td><img src="${gameImage}" style="width: 50px; height: 50px; border-radius: 8px; object-fit: cover; border: 1px solid rgba(255,255,255,0.1);"></td>
+                            <td style="font-weight: 500;">${gameTitle}</td>
+                            <td style="color: #10b981; font-weight: bold;">$${game.price || 0}</td>
+                            <td>
+                                <button class="action-btn delete" onclick="deleteGame('${game._id}')" title="Delete Game">🗑️</button>
+                            </td>
+                        </tr>
+                    `;
+                });
+
+                if (data.totalPages) {
+                    renderDashboardPagination(data.currentPage, data.totalPages);
+                }
+
+            } catch (err) {
+                tBody.innerHTML = '<tr><td colspan="5" style="color: #ef4444; padding: 40px; text-align: center;">Failed to load games.</td></tr>';
+            }
+        }
+
+        function renderDashboardPagination(currentPage, totalPages) {
+            paginationContainer.innerHTML = '';
+            
+            if (totalPages <= 1) return;
+
+            const prevBtn = document.createElement('button');
+            prevBtn.className = 'page-btn';
+            prevBtn.innerHTML = '&laquo;';
+            prevBtn.disabled = currentPage === 1;
+            prevBtn.onclick = () => fetchGamesAdmin(currentPage - 1);
+            paginationContainer.appendChild(prevBtn);
+
+            for (let i = 1; i <= totalPages; i++) {
+                const pageBtn = document.createElement('button');
+                pageBtn.className = `page-btn ${i === currentPage ? 'active' : ''}`;
+                pageBtn.innerText = i;
+                pageBtn.onclick = () => fetchGamesAdmin(i);
+                paginationContainer.appendChild(pageBtn);
+            }
+
+            const nextBtn = document.createElement('button');
+            nextBtn.className = 'page-btn';
+            nextBtn.innerHTML = '&raquo;';
+            nextBtn.disabled = currentPage === totalPages;
+            nextBtn.onclick = () => fetchGamesAdmin(currentPage + 1);
+            paginationContainer.appendChild(nextBtn);
+        }
+
+        async function fetchOrders() {
+            currentTab = 'orders';
+            setActiveNav('nav-orders');
+            sectionTitle.innerText = "Manage Orders";
+            addBtn.style.display = 'none'; 
+            paginationContainer.innerHTML = ''; 
+            
+            tHead.innerHTML = `<tr><th>Order ID</th><th>User Name</th><th>Total</th><th>Status</th><th>Actions</th></tr>`;
+            tBody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: var(--text-muted); padding: 40px;">Loading orders...</td></tr>';
+            
+            try {
+                const res = await fetch('/order/AllOrders', { headers: { 'token': token } }); 
+                const data = await res.json();
+                
+                const orders = data.orders || (Array.isArray(data) ? data : []);
+
+                tBody.innerHTML = '';
+                if(orders.length === 0) {
+                    tBody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: var(--text-muted); padding: 40px;">No orders found.</td></tr>';
+                    return;
+                }
+                
+                orders.forEach(order => {
+                    let statusColor = '#3B82F6';
+                    if(order.status === 'completed') statusColor = '#10b981';
+                    if(order.status === 'rejected') statusColor = '#ef4444';
+
+                    tBody.innerHTML += `
+                        <tr>
+                            <td style="color: var(--text-muted); font-family: monospace;">...${order._id.slice(-6)}</td>
+                            <td style="font-weight: 500;">${order.UserId?.name || 'Unknown User'}</td>
+                            <td style="color: #10b981; font-weight: bold;">$${order.TotalPrice || 0}</td>
+                            <td><span class="role-badge" style="background: ${statusColor}15; color: ${statusColor}; border: 1px solid ${statusColor}40;">${(order.status || 'pending').toUpperCase()}</span></td>
+                            <td>
+                                ${order.status === 'pending' ? `
+                                <button class="action-btn" style="color: #10b981; border-color: rgba(16, 185, 129, 0.3);" title="Accept" onclick="updateOrderStatus('${order._id}', 'completed')">✔️</button>
+                                <button class="action-btn delete" title="Reject" onclick="updateOrderStatus('${order._id}', 'rejected')">❌</button>
+                                ` : `<span style="color: var(--text-muted); font-size: 0.85rem; font-weight: bold; padding: 8px;">Processed</span>`}
+                            </td>
+                        </tr>
+                    `;
+                });
+            } catch (err) {
+                tBody.innerHTML = '<tr><td colspan="5" style="color: #ef4444; padding: 40px; text-align: center;">Failed to load orders.</td></tr>';
+            }
+        }
+
+        async function updateOrderStatus(id, newStatus) {
+            try {
+                const res = await fetch(`/order/UpdateStatus/${id}`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'token': token
+                    },
+                    body: JSON.stringify({ status: newStatus })
+                });
+
+                if(res.ok) {
+                    fetchOrders(); 
+                } else {
+                    alert('Failed to update order status.');
+                }
+            } catch (err) {}
+        }
+
+        document.getElementById('nav-users').addEventListener('click', () => fetchUsers());
+        document.getElementById('nav-games').addEventListener('click', () => fetchGamesAdmin(1));
+        document.getElementById('nav-orders').addEventListener('click', () => fetchOrders());
+
+        addBtn.addEventListener('click', () => {
+            dynamicForm.innerHTML = '';
+            
+            if (currentTab === 'games') {
+                modalTitle.innerText = "Add New Game";
+                dynamicForm.innerHTML = `
+                    <div class="form-group"><input type="text" id="gameTitle" placeholder="Game Title" required></div>
+                    <div class="form-group"><input type="text" id="gameDescription" placeholder="Description" required></div>
+                    <div class="form-group"><input type="number" id="gamePrice" placeholder="Price" required></div>
+                    <div class="form-group"><input type="text" id="gameCategory" placeholder="Category" required></div>
+                    <div class="form-group"><input type="url" id="gameImage" placeholder="Image URL (Link)" required></div>
+                    <div style="display: flex; gap: 15px;">
+                        <div class="form-group" style="flex: 1;"><input type="number" id="gameStock" placeholder="Stock" value="0"></div>
+                        <div class="form-group" style="flex: 1;"><input type="number" id="gameRating" placeholder="Rating (0-5)" min="0" max="5" value="0"></div>
+                    </div>
+                    <div class="form-group">
+                        <select id="gameStatus">
+                            <option value="active">Active Status</option>
+                            <option value="inactive">Inactive Status</option>
+                        </select>
+                    </div>
+                    <div class="form-group"><input type="text" id="gameDeveloper" placeholder="Developer"></div>
+                    <h4 style="margin: 15px 0 10px 0; color: var(--primary-blue); font-size: 0.95rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 8px;">System Requirements</h4>
+                    <div class="form-group"><input type="text" id="reqOs" placeholder="OS (e.g., Windows 10)"></div>
+                    <div class="form-group"><input type="text" id="reqProcessor" placeholder="Processor"></div>
+                    <div class="form-group"><input type="text" id="reqMemory" placeholder="Memory"></div>
+                    <div class="form-group"><input type="text" id="reqGraphics" placeholder="Graphics"></div>
+                    <div class="form-group"><input type="text" id="reqStorage" placeholder="Storage Space"></div>
+                    <button type="submit" class="submit-btn" style="background: var(--primary-blue); color: white;">Add Game</button>
+                `;
+            } else if (currentTab === 'users') {
+                modalTitle.innerText = "Add New Admin";
+                dynamicForm.innerHTML = `
+                    <div class="form-group"><input type="text" id="adminNameInput" placeholder="Name" required></div>
+                    <div class="form-group"><input type="email" id="adminEmail" placeholder="Email" required></div>
+                    <div class="form-group"><input type="password" id="adminPassword" placeholder="Password" required></div>
+                    <button type="submit" class="submit-btn" style="background: var(--admin-color); color: #000;">Add Admin</button>
+                `;
+            }
+            modal.style.display = 'flex';
+        });
+
+        closeModalBtn.addEventListener('click', () => {
+            modal.style.display = 'none';
+        });
+
+        dynamicForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            if (currentTab === 'games') {
+                const payload = {
+                    title: document.getElementById('gameTitle').value,
+                    description: document.getElementById('gameDescription').value,
+                    price: Number(document.getElementById('gamePrice').value),
+                    category: document.getElementById('gameCategory').value,
+                    image: document.getElementById('gameImage').value,
+                    stock: Number(document.getElementById('gameStock').value) || 0,
+                    rating: Number(document.getElementById('gameRating').value) || 0,
+                    status: document.getElementById('gameStatus').value || 'active',
+                    developer: document.getElementById('gameDeveloper').value || 'Unknown',
+                    requirements: {
+                        os: document.getElementById('reqOs').value || 'Windows 10 64-bit',
+                        processor: document.getElementById('reqProcessor').value || 'Intel Core i7-1185G7 / AMD PRO A8-9600',
+                        memory: document.getElementById('reqMemory').value || '8GB - 16GB RAM',
+                        graphics: document.getElementById('reqGraphics').value || 'Intel Iris Xe / AMD Radeon R7',
+                        storage: document.getElementById('reqStorage').value || '50 GB available space'
+                    }
+                };
+                
+                try {
+                    const res = await fetch('/games', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'token': token },
+                        body: JSON.stringify(payload)
+                    });
+                    if(res.ok || res.status === 201) {
+                        modal.style.display = 'none';
+                        fetchGamesAdmin(1); 
+                    } else {
+                        const data = await res.json();
+                        alert(`Failed to add game: ${data.message || 'Unknown error'}`);
+                    }
+                } catch(err) {
+                    alert('Network error while adding game.');
+                }
+
+            } else if (currentTab === 'users') {
+                const payload = {
+                    name: document.getElementById('adminNameInput').value,
+                    email: document.getElementById('adminEmail').value,
+                    password: document.getElementById('adminPassword').value,
+                    role: 'admin'
+                };
+                
+                try {
+                    const res = await fetch('/users/add-admin', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'token': token },
+                        body: JSON.stringify(payload)
+                    });
+                    if(res.ok || res.status === 201) {
+                        modal.style.display = 'none';
+                        fetchUsers();
+                    } else {
+                        const data = await res.json();
+                        alert(`Failed to add admin: ${data.message || 'Unknown error'}`);
+                    }
+                } catch(err) {
+                    alert('Network error while adding admin.');
+                }
+            }
+        });
+
+        async function deleteGame(id) {
+            if(confirm('Are you sure you want to completely delete this game?')) {
+                try {
+                    const res = await fetch(`/games/force/${id}`, { 
+                        method: 'DELETE', 
+                        headers: { 'token': token } 
+                    });
+                    
+                    if(res.ok) {
+                        alert('Game deleted successfully.');
+                        fetchGamesAdmin(1);
+                    } else {
+                        const data = await res.json();
+                        alert(`Failed to delete game: ${data.message || 'Server error'}`);
+                    }
+                } catch (e) {
+                    alert('Network error, please try again.');
+                }
+            }
+        }
+
+        async function deleteUser(id) {
+            if(confirm('Are you sure you want to delete this user?')) {
+                try {
+                    const res = await fetch(`/users/${id}`, { 
+                        method: 'DELETE', 
+                        headers: { 'token': token } 
+                    });
+
+                    if(res.ok) {
+                        alert('User deleted successfully.');
+                        fetchUsers();
+                    } else {
+                        const data = await res.json();
+                        alert(`Failed to delete user: ${data.message || 'Server error'}`);
+                    }
+                } catch (e) {
+                    alert('Network error, please try again.');
+                }
+            }
+        }
+
+        fetchUsers();
+    </script>
+</body>
+</html>

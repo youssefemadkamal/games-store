@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Favorites - Games Store</title>
+    <style>
+        :root {
+            --bg-top: #0f172a; 
+            --bg-bottom: #020617;
+            --panel-bg: #172554; 
+            --primary-blue: #3B82F6;
+            --text-light: #F3F4F6; 
+            --text-muted: #9CA3AF;
+            --heart-color: #ef4444; 
+        }
+        
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            margin: 0; 
+            padding: 0; 
+            background: linear-gradient(180deg, var(--bg-top) 0%, var(--bg-bottom) 100%);
+            background-attachment: fixed;
+            color: var(--text-light); 
+            display: flex; 
+            flex-direction: column; 
+            min-height: 100vh; 
+            overflow-x: hidden;
+        }
+
+        header { 
+            background-color: transparent; 
+            padding: 20px 50px; 
+            display: grid; 
+            grid-template-columns: 1fr auto 1fr;
+            align-items: center; 
+            position: absolute; 
+            top: 0; 
+            width: 100%;
+            box-sizing: border-box;
+            z-index: 100; 
+        }
+        
+        .logo-container { display: flex; align-items: center; gap: 10px; font-size: 1.5rem; font-weight: bold; color: var(--text-light); cursor: pointer; }
+        .logo-container img { width: 40px; height: 40px; border-radius: 50%; background-color: #fff; object-fit: cover; }
+        
+        .nav-links { 
+            display: flex; 
+            gap: 30px; 
+            background: rgba(255, 255, 255, 0.1); 
+            padding: 10px 30px;
+            border-radius: 30px;
+            backdrop-filter: blur(10px);
+            justify-content: center;
+        }
+        .nav-links a { color: var(--text-light); text-decoration: none; font-weight: bold; font-size: 0.95rem; transition: color 0.3s; }
+        .nav-links a:hover, .nav-links a.active { color: var(--primary-blue); }
+
+        .header-actions {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+        }
+
+        .logout-btn { background-color: #ef4444; color: white !important; padding: 10px 20px; border-radius: 20px; font-weight: bold; text-decoration: none; transition: background 0.3s; }
+
+        .page-header {
+            width: 100%;
+            height: 350px; 
+            background-image: linear-gradient(rgba(15, 23, 42, 0.5), rgba(15, 23, 42, 0.5)), 
+                              url('https://images.unsplash.com/photo-1550745165-9bc0b252726f?q=80&w=2070&auto=format&fit=crop'); 
+            background-size: cover;
+            background-position: center;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            -webkit-mask-image: linear-gradient(to bottom, black 70%, transparent 100%);
+            mask-image: linear-gradient(to bottom, black 70%, transparent 100%);
+        }
+
+        .page-header h1 {
+            font-size: 3rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-shadow: 0 5px 15px rgba(0,0,0,0.8);
+            margin-top: 40px;
+        }
+
+        .marketplace { flex: 1; padding: 40px; max-width: 1400px; margin: 0 auto; width: 100%; box-sizing: border-box; }
+        
+        .games-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 25px; }
+
+        .game-card { 
+            background: rgba(20, 20, 20, 0.6); 
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: 10px; 
+            overflow: hidden; 
+            display: flex; 
+            flex-direction: column; 
+            position: relative; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            transition: all 0.3s ease; 
+        }
+
+        .game-card:hover { 
+            transform: translateY(-10px); 
+            box-shadow: 0 15px 35px rgba(59, 130, 246, 0.3);
+            border-color: var(--primary-blue);
+        }
+
+        .corner-ribbon {
+            position: absolute; top: 20px; left: -35px; background: #e50914; color: white; padding: 5px 0; width: 140px;
+            text-align: center; font-size: 0.75rem; font-weight: bold; transform: rotate(-45deg); box-shadow: 0 2px 4px rgba(0,0,0,0.5); z-index: 10; letter-spacing: 1px; text-transform: uppercase;
+        }
+
+        .img-container { position: relative; width: 100%; aspect-ratio: 2 / 3; overflow: hidden; cursor: pointer;}
+        .game-card img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+        .card-info { padding: 15px; text-align: center; display: flex; flex-direction: column; justify-content: space-between; flex: 1;}
+        .card-info h3 { margin: 0 0 8px 0; font-size: 1.05rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #fff; transition: color 0.3s; }
+        .card-info h3:hover { color: var(--primary-blue); }
+        .card-price { color: #10b981; margin: 0; font-weight: bold; font-size: 1.1rem; }
+
+        .fav-btn { position: absolute; top: 10px; right: 10px; background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(5px); border: 1px solid rgba(255,255,255,0.2); border-radius: 50%; width: 35px; height: 35px; display: flex; justify-content: center; align-items: center; cursor: pointer; z-index: 10; }
+        .fav-btn svg { width: 18px; height: 18px; fill: var(--heart-color); stroke: var(--heart-color); stroke-width: 2; transition: transform 0.3s ease; }
+        .fav-btn:hover svg { transform: scale(1.2); }
+
+        footer { background-color: rgba(0,0,0,0.5); text-align: center; padding: 20px; color: var(--text-muted); border-top: 1px solid rgba(30, 58, 138, 0.3); margin-top: auto; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo-container" onclick="window.location.href='/index.html'">
+            <img src="https://i.pinimg.com/736x/68/0e/d9/680ed9ad3e25665eb9f5d9f598a119b7.jpg" alt="Logo">
+            Games Store
+        </div>
+        <div class="nav-links">
+            <a href="/index.html">Home</a>
+            <a href="/index.html#store-section">Store</a>
+            <a href="/favorites.html" class="active">Favorites</a>
+            <a href="/cart.html">Cart</a>
+            <a href="/dashboard.html" id="dashboardLink" style="display: none; color: #f59e0b;">Dashboard</a>
+        </div>
+        <div class="header-actions">
+            <a href="#" id="logoutBtn" class="logout-btn">Logout</a>
+        </div>
+    </header>
+
+    <div class="page-header">
+        <h1>❤️ My Favorites</h1>
+    </div>
+
+    <div class="marketplace">
+        <div class="games-grid" id="fav-games-container">
+            <p style="text-align: center; width: 100%; color: var(--text-muted);">Loading your favorites...</p>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2026 Games Store. All rights reserved.</p>
+    </footer>
+
+    <script>
+        const token = localStorage.getItem('token');
+        if (!token) { window.location.href = '/login.html'; }
+
+        async function checkAdminStatus() {
+            try {
+                const response = await fetch('/users/me', {
+                    headers: { 'token': token }
+                });
+                
+                if (response.ok) {
+                    const userData = await response.json();
+                    if (userData.role === 'admin') {
+                        document.getElementById('dashboardLink').style.display = 'inline-block';
+                    }
+                }
+            } catch (error) {}
+        }
+        checkAdminStatus();
+
+        document.getElementById('logoutBtn').addEventListener('click', () => {
+            localStorage.clear();
+            window.location.href = '/login.html';
+        });
+
+        async function loadFavorites() {
+            const container = document.getElementById('fav-games-container');
+            try {
+                const favRes = await fetch('/favGame', { headers: { 'token': token } });
+                const favData = await favRes.json();
+
+                const gamesRes = await fetch('/games?limit=50');
+                let gamesData = await gamesRes.json();
+                const allGames = gamesData.games || gamesData;
+
+                container.innerHTML = '';
+
+                if (!favData || favData.length === 0) {
+                    container.innerHTML = '<p style="text-align: center; width: 100%; color: var(--text-muted); font-size: 1.2rem; margin-top: 50px;">Your library is empty. Go find some epic games!</p>';
+                    return;
+                }
+
+                favData.forEach(favItem => {
+                    const game = allGames.find(g => g._id === favItem.GameId);
+                    if (game) {
+                        const card = document.createElement('div');
+                        card.className = 'game-card';
+                        card.id = `fav-card-${favItem._id}`; 
+                        
+                        const gameTitle = game.title || game.name || 'Unknown Game';
+                        const gameCategory = game.category || 'Game';
+                        const gameImage = game.image || 'https://via.placeholder.com/300x450';
+
+                        card.innerHTML = `
+                            <div class="img-container" onclick="window.location.href='/game-details.html?id=${game._id}'">
+                                <div class="corner-ribbon">${gameCategory}</div>
+                                <button class="fav-btn" onclick="event.stopPropagation(); removeFavorite('${favItem._id}')" title="Remove from favorites">
+                                    <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+                                </button>
+                                <img src="${gameImage}" alt="${gameTitle}">
+                            </div>
+                            <div class="card-info">
+                                <h3 onclick="window.location.href='/game-details.html?id=${game._id}'">${gameTitle}</h3>
+                                <div class="card-price">$${game.price || 'Free'}</div>
+                            </div>
+                        `;
+                        container.appendChild(card);
+                    }
+                });
+            } catch (error) {
+                container.innerHTML = '<p style="color: #ef4444; text-align: center; width: 100%;">Failed to load favorites.</p>';
+            }
+        }
+
+        async function removeFavorite(favId) {
+            try {
+                const response = await fetch(`/favGame/${favId}`, { method: 'DELETE', headers: { 'token': token } });
+                if (response.ok) {
+                    const card = document.getElementById(`fav-card-${favId}`);
+                    card.style.transform = 'scale(0.8) translateY(20px)';
+                    card.style.opacity = '0';
+                    setTimeout(() => {
+                        card.remove();
+                        if (document.querySelectorAll('.game-card').length === 0) {
+                            document.getElementById('fav-games-container').innerHTML = '<p style="text-align: center; width: 100%; color: var(--text-muted);">Your library is empty.</p>';
+                        }
+                    }, 300);
+                }
+            } catch (error) {}
+        }
+
+        loadFavorites();
+    </script>
+</body>
+</html>
